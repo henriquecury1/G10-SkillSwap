@@ -12,7 +12,7 @@ O objetivo do projeto SkillSwap é desenvolver uma plataforma que conecta estuda
 ## Professores responsáveis
 
 * Wladmir Cardoso Brandao
-* Sandro Jerônimo de Almeida
+* Sandro Jerônimo de Almeida  
 
 ## Instruções de utilização
 
