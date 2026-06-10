@@ -2,9 +2,12 @@ package com.skillswap.service;
 
 import com.skillswap.dao.AmizadeDAO;
 import com.skillswap.dao.UsuarioDAO;
+import com.skillswap.dto.AmizadeDetalhadaDTO;
 import com.skillswap.model.Amizade;
+import com.skillswap.model.Usuario;
 import com.skillswap.response.ApiResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AmizadeService {
@@ -32,13 +35,13 @@ public class AmizadeService {
         Amizade existente = amizadeDAO.findByUsuarios(solicitante, destinatario);
 
         if (existente != null) {
-            if (existente.getStatus() == BLOQUEADO)
+            if (existente.getStatus().equals(BLOQUEADO))
                 return ApiResponse.error("Interação bloqueada entre usuários.");
 
-            if (existente.getStatus() == ACEITA)
+            if (existente.getStatus().equals(ACEITA))
                 return ApiResponse.error("Usuários já são amigos.");
 
-            if (existente.getStatus() == PENDENTE)
+            if (existente.getStatus().equals(PENDENTE))
                 return ApiResponse.error("Solicitação já está pendente.");
 
             existente.setStatus(PENDENTE);
@@ -65,10 +68,10 @@ public class AmizadeService {
         if (amizade == null)
             return ApiResponse.error("Solicitação não encontrada.");
 
-        if (amizade.getStatus() != PENDENTE)
+        if (!amizade.getStatus().equals(PENDENTE))
             return ApiResponse.error("Solicitação não está pendente.");
 
-        if (amizade.getUsuario2() != usuarioLogado)
+        if (!amizade.getUsuario2().equals(usuarioLogado))
             return ApiResponse.error("Apenas o destinatário pode aceitar a solicitação.");
 
         amizade.setStatus(ACEITA);
@@ -85,10 +88,10 @@ public class AmizadeService {
         if (amizade == null)
             return ApiResponse.error("Solicitação não encontrada.");
 
-        if (amizade.getStatus() != PENDENTE)
+        if (!amizade.getStatus().equals(PENDENTE))
             return ApiResponse.error("Solicitação não está pendente.");
 
-        if (amizade.getUsuario2() != usuarioLogado)
+        if (!amizade.getUsuario2().equals(usuarioLogado))
             return ApiResponse.error("Apenas o destinatário pode recusar a solicitação.");
 
         amizade.setStatus(RECUSADA);
@@ -108,8 +111,8 @@ public class AmizadeService {
 
         Amizade amizade = amizadeDAO.findByUsuarios(bloqueador, bloqueado);
 
-        if (amizade != null && amizade.getStatus() == BLOQUEADO) {
-            if (amizade.getUsuario1() == bloqueador)
+        if (amizade != null && amizade.getStatus().equals(BLOQUEADO)) {
+            if (amizade.getUsuario1().equals(bloqueador))
                 return ApiResponse.success("Usuário já está bloqueado.");
 
             return ApiResponse.error("Interação bloqueada entre usuários.");
@@ -140,10 +143,10 @@ public class AmizadeService {
         if (amizade == null)
             return ApiResponse.error("Bloqueio não encontrado.");
 
-        if (amizade.getStatus() != BLOQUEADO)
+        if (!amizade.getStatus().equals(BLOQUEADO))
             return ApiResponse.error("Essa relação não está bloqueada.");
 
-        if (amizade.getUsuario1() != bloqueador)
+        if (!amizade.getUsuario1().equals(bloqueador))
             return ApiResponse.error("Apenas quem bloqueou pode desbloquear.");
 
         amizade.setStatus(RECUSADA);
@@ -160,7 +163,7 @@ public class AmizadeService {
         if (amizade == null)
             return ApiResponse.error("Amizade não encontrada.");
 
-        if (amizade.getStatus() != ACEITA)
+        if (!amizade.getStatus().equals(ACEITA))
             return ApiResponse.error("Essa relação não é uma amizade aceita.");
 
         if (!usuarioPertenceAmizade(amizade, usuarioLogado))
@@ -184,6 +187,36 @@ public class AmizadeService {
         );
     }
 
+    public ApiResponse<List<AmizadeDetalhadaDTO>> listarAmizadesDetalhadasDoUsuario(int idUsuario) {
+        if (usuarioDAO.findById(idUsuario) == null)
+            return ApiResponse.error("Usuário não encontrado.");
+
+        List<Amizade> amizades = amizadeDAO.findByUsuario(idUsuario);
+        List<AmizadeDetalhadaDTO> detalhes = new ArrayList<>();
+
+        for (Amizade amizade : amizades) {
+            Integer idOutroUsuario = amizade.getUsuario1().equals(idUsuario)
+                    ? amizade.getUsuario2()
+                    : amizade.getUsuario1();
+
+            Usuario outroUsuario = usuarioDAO.findById(idOutroUsuario);
+
+            if (outroUsuario != null) {
+                outroUsuario.setSenha(null);
+
+                detalhes.add(new AmizadeDetalhadaDTO(
+                        amizade.getIdAmizade(),
+                        amizade.getStatus(),
+                        amizade.getUsuario1(),
+                        amizade.getUsuario2(),
+                        outroUsuario
+                ));
+            }
+        }
+
+        return ApiResponse.success("Amizades detalhadas listadas com sucesso.", detalhes);
+    }
+
     public ApiResponse<List<Amizade>> listarSolicitacoesRecebidas(int idUsuario) {
         if (usuarioDAO.findById(idUsuario) == null)
             return ApiResponse.error("Usuário não encontrado.");
@@ -192,6 +225,32 @@ public class AmizadeService {
                 "Solicitações recebidas listadas com sucesso.",
                 amizadeDAO.findSolicitacoesRecebidas(idUsuario)
         );
+    }
+
+    public ApiResponse<List<AmizadeDetalhadaDTO>> listarSolicitacoesRecebidasDetalhadas(int idUsuario) {
+        if (usuarioDAO.findById(idUsuario) == null)
+            return ApiResponse.error("Usuário não encontrado.");
+
+        List<Amizade> solicitacoes = amizadeDAO.findSolicitacoesRecebidas(idUsuario);
+        List<AmizadeDetalhadaDTO> detalhes = new ArrayList<>();
+
+        for (Amizade amizade : solicitacoes) {
+            Usuario solicitante = usuarioDAO.findById(amizade.getUsuario1());
+
+            if (solicitante != null) {
+                solicitante.setSenha(null);
+
+                detalhes.add(new AmizadeDetalhadaDTO(
+                        amizade.getIdAmizade(),
+                        amizade.getStatus(),
+                        amizade.getUsuario1(),
+                        amizade.getUsuario2(),
+                        solicitante
+                ));
+            }
+        }
+
+        return ApiResponse.success("Solicitações recebidas detalhadas listadas com sucesso.", detalhes);
     }
 
     public ApiResponse<List<Amizade>> listarSolicitacoesEnviadas(int idUsuario) {
@@ -204,14 +263,40 @@ public class AmizadeService {
         );
     }
 
+    public ApiResponse<List<AmizadeDetalhadaDTO>> listarSolicitacoesEnviadasDetalhadas(int idUsuario) {
+        if (usuarioDAO.findById(idUsuario) == null)
+            return ApiResponse.error("Usuário não encontrado.");
+
+        List<Amizade> solicitacoes = amizadeDAO.findSolicitacoesEnviadas(idUsuario);
+        List<AmizadeDetalhadaDTO> detalhes = new ArrayList<>();
+
+        for (Amizade amizade : solicitacoes) {
+            Usuario destinatario = usuarioDAO.findById(amizade.getUsuario2());
+
+            if (destinatario != null) {
+                destinatario.setSenha(null);
+
+                detalhes.add(new AmizadeDetalhadaDTO(
+                        amizade.getIdAmizade(),
+                        amizade.getStatus(),
+                        amizade.getUsuario1(),
+                        amizade.getUsuario2(),
+                        destinatario
+                ));
+            }
+        }
+
+        return ApiResponse.success("Solicitações enviadas detalhadas listadas com sucesso.", detalhes);
+    }
+
     public boolean amizadeAceitaEntre(int usuario1, int usuario2) {
         Amizade amizade = amizadeDAO.findByUsuarios(usuario1, usuario2);
-        return amizade != null && amizade.getStatus() == ACEITA;
+        return amizade != null && amizade.getStatus().equals(ACEITA);
     }
 
     public boolean interacaoBloqueadaEntre(int usuario1, int usuario2) {
         Amizade amizade = amizadeDAO.findByUsuarios(usuario1, usuario2);
-        return amizade != null && amizade.getStatus() == BLOQUEADO;
+        return amizade != null && amizade.getStatus().equals(BLOQUEADO);
     }
 
     private boolean usuariosExistem(int usuario1, int usuario2) {
@@ -220,6 +305,7 @@ public class AmizadeService {
     }
 
     private boolean usuarioPertenceAmizade(Amizade amizade, int usuario) {
-        return amizade.getUsuario1() == usuario || amizade.getUsuario2() == usuario;
+        return amizade.getUsuario1().equals(usuario)
+                || amizade.getUsuario2().equals(usuario);
     }
 }
