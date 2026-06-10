@@ -28,10 +28,10 @@ public class MensagemService {
         if (amizade == null)
             return ApiResponse.error("Amizade não encontrada.");
 
-        if (amizade.getStatus() != AmizadeService.ACEITA)
+        if (!amizade.getStatus().equals(AmizadeService.ACEITA))
             return ApiResponse.error("Mensagens só podem ser enviadas entre amizades aceitas.");
 
-        if (remetente != amizade.getUsuario1() && remetente != amizade.getUsuario2())
+        if (!remetentePertenceAmizade(remetente, amizade))
             return ApiResponse.error("Remetente não pertence a essa amizade.");
 
         Mensagem mensagem = new Mensagem(null, 1, conteudo, LocalDateTime.now(), remetente, idAmizade);
@@ -48,10 +48,10 @@ public class MensagemService {
         if (amizade == null)
             return ApiResponse.error("Amizade não encontrada.");
 
-        if (usuarioLogado != amizade.getUsuario1() && usuarioLogado != amizade.getUsuario2())
+        if (!remetentePertenceAmizade(usuarioLogado, amizade))
             return ApiResponse.error("Usuário não pertence a essa amizade.");
 
-        if (amizade.getStatus() != AmizadeService.ACEITA)
+        if (!amizade.getStatus().equals(AmizadeService.ACEITA))
             return ApiResponse.error("Mensagens só podem ser listadas em amizades aceitas.");
 
         return ApiResponse.success(
@@ -71,15 +71,20 @@ public class MensagemService {
         if (amizade == null)
             return ApiResponse.error("Amizade não encontrada.");
 
-        if (usuarioLogado != amizade.getUsuario1() && usuarioLogado != amizade.getUsuario2())
+        if (!remetentePertenceAmizade(usuarioLogado, amizade))
             return ApiResponse.error("Usuário não pertence a essa amizade.");
 
-        if (mensagem.getRemetente() != usuarioLogado)
+        if (!mensagem.getRemetente().equals(usuarioLogado))
             return ApiResponse.error("Você só pode deletar mensagens enviadas por você.");
 
         if (!mensagemDAO.delete(idMensagem))
             return ApiResponse.error("Erro ao deletar mensagem.");
 
         return ApiResponse.success("Mensagem deletada com sucesso.");
+    }
+
+    private boolean remetentePertenceAmizade(Integer remetente, Amizade amizade) {
+        return amizade.getUsuario1().equals(remetente)
+                || amizade.getUsuario2().equals(remetente);
     }
 }
