@@ -4,8 +4,11 @@ import com.skillswap.dao.QualificacaoDAO;
 import com.skillswap.dao.SkillDAO;
 import com.skillswap.dao.UsuarioDAO;
 import com.skillswap.model.Qualificacao;
+import com.skillswap.model.Skill;
+import com.skillswap.model.Usuario;
 import com.skillswap.response.ApiResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class QualificacaoService {
@@ -48,6 +51,23 @@ public class QualificacaoService {
         );
     }
 
+    public ApiResponse<List<Skill>> listarSkillsDetalhadasDoUsuario(int idUsuario) {
+        if (usuarioDAO.findById(idUsuario) == null)
+            return ApiResponse.error("Usuário não encontrado.");
+
+        List<Qualificacao> qualificacoes = qualificacaoDAO.findByUsuario(idUsuario);
+        List<Skill> skills = new ArrayList<>();
+
+        for (Qualificacao qualificacao : qualificacoes) {
+            Skill skill = skillDAO.findById(qualificacao.getSkill());
+
+            if (skill != null)
+                skills.add(skill);
+        }
+
+        return ApiResponse.success("Skills detalhadas do usuário listadas com sucesso.", skills);
+    }
+
     public ApiResponse<List<Qualificacao>> listarUsuariosPorSkill(int idSkill) {
         if (skillDAO.findById(idSkill) == null)
             return ApiResponse.error("Skill não encontrada.");
@@ -56,6 +76,25 @@ public class QualificacaoService {
                 "Usuários por skill listados com sucesso.",
                 qualificacaoDAO.findBySkill(idSkill)
         );
+    }
+
+    public ApiResponse<List<Usuario>> listarUsuariosDetalhadosPorSkill(int idSkill) {
+        if (skillDAO.findById(idSkill) == null)
+            return ApiResponse.error("Skill não encontrada.");
+
+        List<Qualificacao> qualificacoes = qualificacaoDAO.findBySkill(idSkill);
+        List<Usuario> usuarios = new ArrayList<>();
+
+        for (Qualificacao qualificacao : qualificacoes) {
+            Usuario usuario = usuarioDAO.findById(qualificacao.getQualificado());
+
+            if (usuario != null) {
+                usuario.setSenha(null);
+                usuarios.add(usuario);
+            }
+        }
+
+        return ApiResponse.success("Usuários detalhados por skill listados com sucesso.", usuarios);
     }
 
     public ApiResponse<Void> removerSkillDoUsuario(int idUsuario, int idSkill) {
@@ -71,6 +110,6 @@ public class QualificacaoService {
     private boolean usuarioPossuiSkill(int idUsuario, int idSkill) {
         return qualificacaoDAO.findByUsuario(idUsuario)
                 .stream()
-                .anyMatch(q -> q.getSkill() == idSkill);
+                .anyMatch(q -> q.getSkill().equals(idSkill));
     }
 }
