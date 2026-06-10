@@ -150,6 +150,16 @@ public class AmizadeController {
             return gson.toJson(response);
         });
 
+        get("/usuarios/:id/amizades-detalhadas", (req, res) -> {
+            res.type("application/json");
+
+            int idUsuario = Integer.parseInt(req.params(":id"));
+            ApiResponse<?> response = amizadeService.listarAmizadesDetalhadasDoUsuario(idUsuario);
+
+            res.status(response.isSuccess() ? 200 : 404);
+            return gson.toJson(response);
+        });
+
         get("/usuarios/:id/amizades/recebidas", (req, res) -> {
             res.type("application/json");
 
@@ -173,6 +183,29 @@ public class AmizadeController {
             return gson.toJson(response);
         });
 
+        get("/usuarios/:id/amizades/recebidas-detalhadas", (req, res) -> {
+            res.type("application/json");
+
+            Integer idLogado = getIdUsuarioAutenticado(req.headers("Authorization"));
+
+            if (idLogado == null) {
+                res.status(401);
+                return gson.toJson(ApiResponse.error("Token inválido ou ausente."));
+            }
+
+            int idUsuario = Integer.parseInt(req.params(":id"));
+
+            if (!idLogado.equals(idUsuario)) {
+                res.status(403);
+                return gson.toJson(ApiResponse.error("Você só pode ver suas próprias solicitações."));
+            }
+
+            ApiResponse<?> response = amizadeService.listarSolicitacoesRecebidasDetalhadas(idUsuario);
+
+            res.status(response.isSuccess() ? 200 : 404);
+            return gson.toJson(response);
+        });
+
         get("/usuarios/:id/amizades/enviadas", (req, res) -> {
             res.type("application/json");
 
@@ -191,6 +224,29 @@ public class AmizadeController {
             }
 
             ApiResponse<?> response = amizadeService.listarSolicitacoesEnviadas(idUsuario);
+
+            res.status(response.isSuccess() ? 200 : 404);
+            return gson.toJson(response);
+        });
+
+        get("/usuarios/:id/amizades/enviadas-detalhadas", (req, res) -> {
+            res.type("application/json");
+
+            Integer idLogado = getIdUsuarioAutenticado(req.headers("Authorization"));
+
+            if (idLogado == null) {
+                res.status(401);
+                return gson.toJson(ApiResponse.error("Token inválido ou ausente."));
+            }
+
+            int idUsuario = Integer.parseInt(req.params(":id"));
+
+            if (!idLogado.equals(idUsuario)) {
+                res.status(403);
+                return gson.toJson(ApiResponse.error("Você só pode ver suas próprias solicitações."));
+            }
+
+            ApiResponse<?> response = amizadeService.listarSolicitacoesEnviadasDetalhadas(idUsuario);
 
             res.status(response.isSuccess() ? 200 : 404);
             return gson.toJson(response);
