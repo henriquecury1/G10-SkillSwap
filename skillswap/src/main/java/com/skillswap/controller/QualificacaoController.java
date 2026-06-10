@@ -64,11 +64,31 @@ public class QualificacaoController {
             return gson.toJson(response);
         });
 
+        get("/usuarios/:id/skills-detalhadas", (req, res) -> {
+            res.type("application/json");
+
+            int idUsuario = Integer.parseInt(req.params(":id"));
+            ApiResponse<?> response = qualificacaoService.listarSkillsDetalhadasDoUsuario(idUsuario);
+
+            res.status(response.isSuccess() ? 200 : 404);
+            return gson.toJson(response);
+        });
+
         get("/skills/:id/usuarios", (req, res) -> {
             res.type("application/json");
 
             int idSkill = Integer.parseInt(req.params(":id"));
             ApiResponse<?> response = qualificacaoService.listarUsuariosPorSkill(idSkill);
+
+            res.status(response.isSuccess() ? 200 : 404);
+            return gson.toJson(response);
+        });
+
+        get("/skills/:id/usuarios-detalhados", (req, res) -> {
+            res.type("application/json");
+
+            int idSkill = Integer.parseInt(req.params(":id"));
+            ApiResponse<?> response = qualificacaoService.listarUsuariosDetalhadosPorSkill(idSkill);
 
             res.status(response.isSuccess() ? 200 : 404);
             return gson.toJson(response);
