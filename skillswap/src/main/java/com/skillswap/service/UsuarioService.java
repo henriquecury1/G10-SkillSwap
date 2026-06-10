@@ -1,23 +1,34 @@
 package com.skillswap.service;
 
+import com.skillswap.dao.QualificacaoDAO;
+import com.skillswap.dao.SkillDAO;
 import com.skillswap.dao.UsuarioDAO;
 import com.skillswap.dto.AtualizarPerfilDTO;
 import com.skillswap.dto.AtualizarSenhaDTO;
 import com.skillswap.dto.CadastroUsuarioDTO;
 import com.skillswap.dto.LoginDTO;
 import com.skillswap.dto.LoginResponseDTO;
+import com.skillswap.dto.PerfilUsuarioDTO;
+import com.skillswap.model.Qualificacao;
+import com.skillswap.model.Skill;
 import com.skillswap.model.Usuario;
 import com.skillswap.response.ApiResponse;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UsuarioService {
 
     private final UsuarioDAO usuarioDAO;
+    private final SkillDAO skillDAO;
+    private final QualificacaoDAO qualificacaoDAO;
     private final JWTService jwtService;
 
     public UsuarioService() {
         this.usuarioDAO = new UsuarioDAO();
+        this.skillDAO = new SkillDAO();
+        this.qualificacaoDAO = new QualificacaoDAO();
         this.jwtService = new JWTService();
     }
 
@@ -75,6 +86,29 @@ public class UsuarioService {
             usuario.setSenha(null);
 
         return usuario;
+    }
+
+    public ApiResponse<List<Usuario>> listarTodos() {
+        List<Usuario> usuarios = usuarioDAO.findAll();
+
+        for (Usuario usuario : usuarios)
+            usuario.setSenha(null);
+
+        return ApiResponse.success("Usuários listados com sucesso.", usuarios);
+    }
+
+    public ApiResponse<PerfilUsuarioDTO> buscarPerfil(int idUsuario) {
+        Usuario usuario = usuarioDAO.findById(idUsuario);
+
+        if (usuario == null)
+            return ApiResponse.error("Usuário não encontrado.");
+
+        usuario.setSenha(null);
+
+        List<Skill> skills = listarSkillsCompletasDoUsuario(idUsuario);
+        PerfilUsuarioDTO perfil = new PerfilUsuarioDTO(usuario, skills);
+
+        return ApiResponse.success("Perfil encontrado com sucesso.", perfil);
     }
 
     public ApiResponse<Void> atualizarPerfil(int idUsuario, AtualizarPerfilDTO dto) {
@@ -158,6 +192,20 @@ public class UsuarioService {
         float novaMedia = ((mediaAtual * numAvaliacoes) - notaAntiga + notaNova) / numAvaliacoes;
 
         return usuarioDAO.updateNota(idUsuario, novaMedia, numAvaliacoes);
+    }
+
+    private List<Skill> listarSkillsCompletasDoUsuario(int idUsuario) {
+        List<Qualificacao> qualificacoes = qualificacaoDAO.findByUsuario(idUsuario);
+        List<Skill> skills = new ArrayList<>();
+
+        for (Qualificacao qualificacao : qualificacoes) {
+            Skill skill = skillDAO.findById(qualificacao.getSkill());
+
+            if (skill != null)
+                skills.add(skill);
+        }
+
+        return skills;
     }
 
     private boolean isBlank(String valor) {
