@@ -47,6 +47,15 @@ public class UsuarioController {
             return gson.toJson(response);
         });
 
+        get("/usuarios", (req, res) -> {
+            res.type("application/json");
+
+            ApiResponse<?> response = usuarioService.listarTodos();
+
+            res.status(200);
+            return gson.toJson(response);
+        });
+
         get("/usuarios/:id", (req, res) -> {
             res.type("application/json");
 
@@ -59,6 +68,16 @@ public class UsuarioController {
             }
 
             return gson.toJson(ApiResponse.success("Usuário encontrado.", usuario));
+        });
+
+        get("/usuarios/:id/perfil", (req, res) -> {
+            res.type("application/json");
+
+            int idUsuario = Integer.parseInt(req.params(":id"));
+            ApiResponse<?> response = usuarioService.buscarPerfil(idUsuario);
+
+            res.status(response.isSuccess() ? 200 : 404);
+            return gson.toJson(response);
         });
 
         put("/usuarios/:id", (req, res) -> {
