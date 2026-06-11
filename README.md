@@ -57,7 +57,7 @@ O Vite já está configurado para fazer proxy das requisições `/api/*` para o 
 
 **Backend:** Java, Spark Framework, JWT, Gson, H2/MySQL
 
-**Frontend:** React 18, TypeScript, Vite, Tailwind CSS, React Router v6, Axios, TanStack Query v5, React Hook Form, Zod, Lucide React
+**Frontend:** React 18, TypeScript, Vite, Tailwind CSS,
 
 ## Endpoints da API
 
