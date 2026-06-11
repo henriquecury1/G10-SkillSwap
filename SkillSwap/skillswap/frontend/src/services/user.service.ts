@@ -12,6 +12,11 @@ export const userService = {
     return res.data
   },
 
+  async listarTodos(): Promise<ApiResponse<Usuario[]>> {
+    const res = await api.get<ApiResponse<Usuario[]>>('/usuarios')
+    return res.data
+  },
+
   async atualizarPerfil(id: number, dados: { nome?: string; email?: string; bio?: string }): Promise<ApiResponse<void>> {
     const res = await api.put<ApiResponse<void>>(`/usuarios/${id}`, dados)
     return res.data

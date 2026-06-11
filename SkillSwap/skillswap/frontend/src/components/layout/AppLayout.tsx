@@ -11,13 +11,15 @@ import {
   LogOut,
   Menu,
   X,
-  BookOpen
+  BookOpen,
+  Compass
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/skills', icon: Zap, label: 'Skills' },
+  { to: '/descobrir', icon: Compass, label: 'Descobrir' },
   { to: '/amizades', icon: Users, label: 'Conexões' },
   { to: '/mensagens', icon: MessageSquare, label: 'Mensagens' },
   { to: '/avaliacoes', icon: Star, label: 'Avaliações' },

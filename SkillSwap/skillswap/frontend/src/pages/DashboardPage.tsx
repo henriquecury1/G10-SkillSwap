@@ -8,6 +8,7 @@ import { qualificationService } from '../services/qualification.service'
 import { reviewService } from '../services/review.service'
 import StarRating from '../components/ui/StarRating'
 import { AmizadeStatus } from '../types'
+import { userService } from '../services/user.service'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -24,9 +25,9 @@ export default function DashboardPage() {
     enabled: !!user
   })
 
-  const { data: skillsData } = useQuery({
-    queryKey: ['skills-usuario', user?.idUsuario],
-    queryFn: () => qualificationService.listarSkillsDoUsuario(user!.idUsuario),
+  const { data: perfilData } = useQuery({
+    queryKey: ['perfil', user?.idUsuario],
+    queryFn: () => userService.buscarPerfil(user!.idUsuario),
     enabled: !!user
   })
 
@@ -38,7 +39,7 @@ export default function DashboardPage() {
 
   const amizadesAceitas = (amizadesData?.data ?? []).filter(a => a.status === AmizadeStatus.ACEITA)
   const pendentes = (solicitacoesData?.data ?? []).filter(a => a.status === AmizadeStatus.PENDENTE)
-  const skills = skillsData?.data ?? []
+  const skills = perfilData?.data?.skills ?? []
   const avaliacoes = avaliacoesData?.data ?? []
   const notaMedia = avaliacoes.length > 0
     ? (avaliacoes.reduce((acc, a) => acc + a.nota, 0) / avaliacoes.length)

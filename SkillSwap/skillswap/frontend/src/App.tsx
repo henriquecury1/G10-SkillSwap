@@ -14,6 +14,7 @@ import MessagesPage from './pages/MessagesPage'
 import ChatPage from './pages/ChatPage'
 import ReviewsPage from './pages/ReviewsPage'
 import SettingsPage from './pages/SettingsPage'
+import DiscoverPage from './pages/DiscoverPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth()
@@ -40,6 +41,7 @@ function AppRoutes() {
       <Route path="/mensagens" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
       <Route path="/mensagens/:idAmizade" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
       <Route path="/avaliacoes" element={<ProtectedRoute><ReviewsPage /></ProtectedRoute>} />
+      <Route path="/descobrir" element={<ProtectedRoute><DiscoverPage /></ProtectedRoute>} />
       <Route path="/configuracoes" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
