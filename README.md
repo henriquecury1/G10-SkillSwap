@@ -16,48 +16,44 @@ O objetivo do projeto SkillSwap é desenvolver uma plataforma que conecta estuda
 
 ## Instruções de utilização
 
-# SkillSwap
-
 Plataforma universitária de troca de conhecimentos entre estudantes.
 
 ## Estrutura
 
-```
 skillswap/
 ├── backend/       # Java + Spark Framework (porta 4567)
 ├── frontend/      # React + TypeScript + Vite (porta 5173)
 └── README.md
-```
 
 ## Como rodar
 
 ### Backend
 
-```bash
 cd backend
 mvn package -DskipTests
 java -jar target/skillswap-1.0-SNAPSHOT-jar-with-dependencies.jar
-```
 
-O backend sobe em `http://localhost:4567`.
+O backend sobe em http://localhost:4567.
 
 ### Frontend
 
-```bash
 cd frontend
 npm install
 npm run dev
-```
 
-O frontend sobe em `http://localhost:5173`.
+O frontend sobe em http://localhost:5173.
 
-O Vite já está configurado para fazer proxy das requisições `/api/*` para o backend em `localhost:4567`, então não há problema de CORS no desenvolvimento.
+O Vite já está configurado para fazer proxy das requisições /api/* para o backend em localhost:4567, então não há problema de CORS no desenvolvimento.
 
 ## Stack
 
 **Backend:** Java, Spark Framework, JWT, Gson, H2/MySQL
 
-**Frontend:** React 18, TypeScript, Vite, Tailwind CSS,
+**Frontend:** React 18, TypeScript, Vite, Tailwind CSS
+
+## Demonstração do Projeto
+
+📺 [Assista à demonstração em vídeo do SkillSwap no YouTube](https://youtu.be/p9cR9s-bWzI)
 
 ## Endpoints da API
 
@@ -88,4 +84,3 @@ O Vite já está configurado para fazer proxy das requisições `/api/*` para o 
 | POST | /avaliacoes | Sim | Avaliar usuário |
 | PUT | /avaliacoes | Sim | Editar avaliação |
 | GET | /usuarios/:id/avaliacoes | Não | Listar avaliações |
-
